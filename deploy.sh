@@ -7,15 +7,15 @@ set -eu
 
 #### CONFIGURATION SECTION ####
 aws_profile="$1" # e.g. sot-academy, for the aws credentials
-your_name="$2" # e.g. rory-gilmore (WITH DASHES), for the stack name
-deployment_bucket="${your_name}-shopper-deployment-bucket"
+your_name="spam" # Team name
+deployment_bucket="${your_name}-deployment-bucket"
 #### CONFIGURATION SECTION ####
 
 # Create deployment bucket stack
 echo ""
 echo "Doing deployment bucket..."
 echo ""
-aws cloudformation deploy --stack-name "${your_name}-shopper-deployment-bucket" \
+aws cloudformation deploy --stack-name "${your_name}-deployment-stack" \
     --template-file deployment-bucket-stack.yml --region eu-west-1 \
     --capabilities CAPABILITY_IAM --profile ${aws_profile} \
     --parameter-overrides \
@@ -49,7 +49,7 @@ aws cloudformation package --template-file etl-stack.yml \
 echo ""
 echo "Doing etl stack deployment..."
 echo ""
-aws cloudformation deploy --stack-name "${your_name}-shopper-etl-pipeline" \
+aws cloudformation deploy --stack-name "${your_name}-etl-stack" \
     --template-file etl-stack-packaged.yml --region eu-west-1 \
     --capabilities CAPABILITY_IAM \
     --profile ${aws_profile} \

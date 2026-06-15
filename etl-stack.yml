@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >
-  Mystery Shopper ETL pipeline example for AWS week in the Data Engineering Software Academy
+  ETL lambda skeleton for spam project, triggered by S3 bucket upload.
 
 Parameters:
   YourName:
@@ -16,7 +16,7 @@ Resources:
   EtlLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub '${YourName}-shopper-etl-lambda'
+      FunctionName: !Sub '${YourName}-etl-lambda'
       Runtime: python3.12
       Handler: mystery_shop_etl_lambda.lambda_handler # file_name.function_name
       Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/lambda-execution-role' # security rule
@@ -32,15 +32,15 @@ Resources:
               !Sub '${NetworkStackName}-PrivateSubnet0ID'
       Tags:
         - Key: Name
-          Value: !Sub '${YourName}-shopper-etl-lambda'
+          Value: !Sub '${YourName}-etl-lambda'
 
-  ShopperRawDataBucket:
+  RawDataBucket:
     Type: AWS::S3::Bucket
     DependsOn:
-      - ShopperRawDataBucketPermission
+      - RawDataBucketPermission
       - EtlLambdaFunction
     Properties:
-      BucketName: !Sub '${YourName}-shopper-raw-data'
+      BucketName: !Sub '${YourName}-raw-data'
       PublicAccessBlockConfiguration: # do not allow any public access
         BlockPublicAcls: True
         BlockPublicPolicy: True
@@ -52,20 +52,20 @@ Resources:
             Function: !GetAtt EtlLambdaFunction.Arn
       Tags:
         - Key: Name
-          Value: !Sub '${YourName}-shopper-raw-data'
+          Value: !Sub '${YourName}-raw-data'
 
-  ShopperRawDataBucketPermission: # allow the triggered lambda to read from the bucket
+  RawDataBucketPermission: # allow the triggered lambda to read from the bucket
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref EtlLambdaFunction
       Principal: s3.amazonaws.com
-      SourceArn: !Sub 'arn:aws:s3:::${YourName}-shopper-raw-data'
+      SourceArn: !Sub 'arn:aws:s3:::${YourName}-raw-data'
 
-  ShopperRawDataBucketPolicy:
+  RawDataBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref ShopperRawDataBucket
+      Bucket: !Ref RawDataBucket
       PolicyDocument:
         Statement:
           - Sid: "AllowSSLRequestsOnly"
@@ -73,8 +73,8 @@ Resources:
             Principal: "*"
             Effect: "Deny" # Block if...
             Resource:
-              - !Sub "arn:aws:s3:::${YourName}-shopper-raw-data"
-              - !Sub "arn:aws:s3:::${YourName}-shopper-raw-data/*"
+              - !Sub "arn:aws:s3:::${YourName}-raw-data"
+              - !Sub "arn:aws:s3:::${YourName}-raw-data/*"
             Condition:
               Bool:
                 aws:SecureTransport: "false" # ...the request is not HTTPS

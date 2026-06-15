@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >
-  MysteryShopper S3 + Lambda Cloudformation example deployment bucket for CF files + Lambda zips
+  ETL lambda skeleton for spam project, triggered by S3 bucket upload.
 
 Parameters:
   YourName:
@@ -11,7 +11,7 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub '${YourName}-shopper-deployment-bucket'
+      BucketName: !Sub '${YourName}-deployment-bucket'
       PublicAccessBlockConfiguration: # do not allow any public access
         BlockPublicAcls: True
         BlockPublicPolicy: True
@@ -19,7 +19,7 @@ Resources:
         RestrictPublicBuckets: True
       Tags:
         - Key: Name
-          Value: !Sub '${YourName}-shopper-deployment-bucket'
+          Value: !Sub '${YourName}-deployment-bucket'
 
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -32,8 +32,8 @@ Resources:
             Principal: "*"
             Effect: "Deny" # Block if...
             Resource:
-              - !Sub "arn:aws:s3:::${YourName}-shopper-deployment-bucket"
-              - !Sub "arn:aws:s3:::${YourName}-shopper-deployment-bucket/*"
+              - !Sub "arn:aws:s3:::${YourName}-deployment-bucket"
+              - !Sub "arn:aws:s3:::${YourName}-deployment-bucket/*"
             Condition:
               Bool:
                 aws:SecureTransport: "false" # ...the request is not HTTPS

@@ -1,10 +1,13 @@
 import os
+import sys
 import csv
 import json
 import uuid
 import hashlib
 from datetime import datetime
 from collections import defaultdict
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # where this file lives
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,17 +21,6 @@ CSV_PATH = os.path.normpath(
 OUTPUT_PATH = os.path.normpath(
     os.path.join(BASE_DIR, "..", "ingestion", "sources", "leeds_order.json")
 )
-
-
-# -----------------------------
-# EXTRACT
-# -----------------------------
-def extract_csv(file_path):
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"CSV not found at: {file_path}")
-
-    with open(file_path, mode="r", encoding="utf-8") as file:
-        return list(csv.DictReader(file))
 
 
 # -----------------------------
@@ -149,24 +141,25 @@ def load_json(data, output_file):
 
 
 # -----------------------------
-# PIPELINE
+# SAVE TO CSV
 # -----------------------------
-def run_pipeline():
-    rows = extract_csv(CSV_PATH)
+def save_to_csv(orders, order_items, output_dir):
+    # write orders and order_items as separate CSV files
+    os.makedirs(output_dir, exist_ok=True)
 
-    orders, order_items = transform_data(rows)
+    orders_path = os.path.join(output_dir, "orders.csv")
+    with open(orders_path, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=orders[0].keys())
+        writer.writeheader()
+        writer.writerows(orders)
 
-    load_json(
-        {
-            "orders": orders,
-            "order_items": order_items
-        },
-        OUTPUT_PATH
-    )
+    items_path = os.path.join(output_dir, "order_items.csv")
+    with open(items_path, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=order_items[0].keys())
+        writer.writeheader()
+        writer.writerows(order_items)
 
-    print("\n--- DONE ---")
-    print("Orders:", len(orders))
-    print("Order items:", len(order_items))
+    print(f"CSV files saved to {output_dir}")
 
-    return orders, order_items
+
 

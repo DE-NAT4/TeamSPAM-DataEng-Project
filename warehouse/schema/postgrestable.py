@@ -16,8 +16,33 @@ def get_connection():
         host=host_name,
         dbname=database_name,
         user=user_name,
+        password=user_password,
+        port=os.getenv("POSTGRES_PORT", "5432")
+    )
+
+
+def create_database():
+    # we can't create a database while connected to it
+    # so we connect to the default 'postgres' db first, create ours, then switch
+    conn = psycopg2.connect(
+        host=host_name,
+        dbname="postgres",
+        user=user_name,
         password=user_password
     )
+    # autocommit must be on - CREATE DATABASE can't run inside a transaction
+    conn.autocommit = True
+    cur = conn.cursor()
+
+    cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database_name,))
+    if not cur.fetchone():
+        cur.execute(f"CREATE DATABASE {database_name}")
+        print(f"Database '{database_name}' created!")
+    else:
+        print(f"Database '{database_name}' already exists, skipping.")
+
+    cur.close()
+    conn.close()
 
 
 def create_tables():

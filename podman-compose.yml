@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+
+  # postgres database - credentials come from your .env file
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # adminer is a lightweight web UI for browsing the database
+  # open http://localhost:8080 in your browser once containers are running
+  # system: PostgreSQL, server: postgres, use credentials from your .env
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

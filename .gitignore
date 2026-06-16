@@ -149,6 +149,11 @@ activemq-data/
 
 # Environments
 .env
+
+# Generated pipeline output - recreated every time the pipeline runs
+pipeline/ingestion/sources/leeds_order.json
+pipeline/ingestion/sources/orders.csv
+pipeline/ingestion/sources/order_items.csv
 .envrc
 .venv
 env/

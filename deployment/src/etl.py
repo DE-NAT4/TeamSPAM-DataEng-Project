@@ -33,3 +33,9 @@ def extract(body_text):
 
     LOGGER.info(f'extract: done: rows={len(data)}')
     return data
+
+
+def clean_data(rows):
+    orders, order_items = transform.transform_data(rows)
+    print(f"Transformed into {len(orders)} orders and {len(order_items)} order items")
+    return orders, order_items

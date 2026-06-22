@@ -18,7 +18,7 @@ Resources:
     Properties:
       FunctionName: !Sub '${YourName}-etl-lambda'
       Runtime: python3.12
-      Handler: mystery_shop_etl_lambda.lambda_handler # file_name.function_name
+      Handler: etl_lambda.lambda_handler # file_name.function_name
       Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/lambda-execution-role' # security rule
       Timeout: 30 # max running time in seconds (make as low as possible)
       ReservedConcurrentExecutions: 10 # how many can run at once
@@ -33,6 +33,14 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${YourName}-etl-lambda'
+      Environment:
+        Variables:
+          SSM_PARAMETER_NAME:
+            Fn::Join:
+            - '_'
+            - Fn::Split:
+              - '-'
+              - !Sub '${TeamName}_redshift_settings'
 
   RawDataBucket:
     Type: AWS::S3::Bucket

@@ -4,7 +4,7 @@
 # 1. DEFINE YOUR AWS PROFILE AND STACKS
 # ==========================================
 # This tells the script to use the active SSO session you just logged into
-export AWS_PROFILE="SarahDE"
+export AWS_PROFILE=<your-aws-profile-name>
 
 # Replace these strings with the exact names of your CloudFormation stacks
 STACK_A="spam-deployment-stack"   # The stack that holds the upload bucket

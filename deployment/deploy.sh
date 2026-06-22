@@ -6,8 +6,10 @@ set -eu
 ###
 
 ### CONFIGURATION SECTION ###
-aws_profile="$1" # e.g. sot-academy, for the aws credentials
-your_name="spam" # Team name
+# Usage: bash deploy.sh <aws-profile> <team-name>
+# Example: bash deploy.sh data-course spam
+aws_profile="$1"
+your_name="$2"
 deployment_bucket="${your_name}-deployment-bucket"
 
 # Find absolute path

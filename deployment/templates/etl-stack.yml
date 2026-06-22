@@ -20,7 +20,7 @@ Resources:
       Runtime: python3.12
       Handler: etl_lambda.lambda_handler # file_name.function_name
       Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/lambda-execution-role' # security rule
-      Timeout: 120 # max running time in seconds
+      Timeout: 300 # max running time in seconds (5 minutes)
       ReservedConcurrentExecutions: 10 # how many can run at once
       Code: ../src/
       Environment:

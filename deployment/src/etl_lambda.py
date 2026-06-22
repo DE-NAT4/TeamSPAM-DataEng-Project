@@ -2,7 +2,7 @@ from utils import s3_utils
 from utils import db_utils
 from utils import sql_utils
 
-import etl
+import transform
 import logging
 import os
 
@@ -32,8 +32,8 @@ def lambda_handler(event, context):
         bucket_name, file_path = s3_utils.get_file_info(event)
         csv_text = s3_utils.load_file(bucket_name, file_path)
 
-        data = etl.extract(csv_text)
-        orders, order_items = etl.transform(data)
+        data = transform.extract(csv_text)
+        orders, order_items = transform.transform(data)
 
         LOGGER.info(
             f'lambda_handler: transformed file={file_path}, '

@@ -34,6 +34,7 @@ def lambda_handler(event, context):
         #     {'name': 'Alice', 'age': '30', 'city': 'London'},
         #     {'name': 'Bob', 'age': '25', 'city': 'New York'}
         # ]
+        orders, order_items = etl.clean_data(data)
     
     except Exception as err:
         LOGGER.error(f'lambda_handler: processing failure: error={err}, file={file_path}')

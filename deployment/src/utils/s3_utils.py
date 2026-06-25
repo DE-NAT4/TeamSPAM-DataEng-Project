@@ -1,32 +1,31 @@
 import boto3
 import logging
 
-#Use logger instead of print statements for better logging and debugging
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
-#aws s3 client
+# aws s3 client - created once at module level so it is reused across invocations
 s3_client = boto3.client('s3')
 
 
 def get_file_info(event):
-    LOGGER.info('get_file_info: starting')
+    """
+    Extracts the S3 bucket name and file path from the Lambda trigger event.
 
-        #Retrieves the first record from the event (json) looks like this:
-    # {
-    #   "Records": [
-    #     {
-    #       "s3": {
-    #         "bucket": {
-    #           "name": "example-bucket"
-    #         },
-    #         "object": {
-    #           "key": "example-file.txt"
-    #         }
-    #       }
-    #     }
-    #   ]
-    # }
+    When a file is uploaded to S3, AWS sends a JSON event to Lambda:
+    {
+      "Records": [{
+        "s3": {
+          "bucket": {"name": "spam-raw-data"},
+          "object": {"key": "leedsdata.csv"}
+        }
+      }]
+    }
+
+    Returns:
+        Tuple of (bucket_name, file_name) both as strings.
+    """
+    LOGGER.info('get_file_info: starting')
 
     first_record = event['Records'][0]
     bucket_name = first_record['s3']['bucket']['name']
@@ -37,38 +36,18 @@ def get_file_info(event):
 
 
 def load_file(bucket_name, s3_key):
-    LOGGER.info(f'load_file: loading s3_key={s3_key} from bucket_name={bucket_name}')
-    response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
-    #response would look like this:
-    # {
-#     'Body': <botocore.response.StreamingBody object at 0x7fcb12345678>,
-#     'AcceptRanges': 'bytes',
-#     'ContentType': 'text/csv',
-#     'ContentLength': 1056,
-#     'ETag': '"d41d8cd98f00b204e9800998ecf8427e"',
-#     'LastModified': datetime.datetime(2026, 6, 17, 14, 30, 0, tzinfo=tzutc()),
-#     'Metadata': {},
-#     'ResponseMetadata': {
-#         'RequestId': 'A1B2C3D4E5F6G7H8',
-#         'HostId': 'ab12cd34ef56gh78ij90kl12mn34op56qr78st90uv12wx34yz56',
-#         'HTTPStatusCode': 200,
-#         'HTTPHeaders': {
-#             'x-amz-id-2': 'ab12cd34ef56gh78ij90...',
-#             'x-amz-request-id': 'A1B2C3D4E5F6G7H8',
-#             'date': 'Wed, 17 Jun 2026 15:21:51 GMT',
-#             'last-modified': 'Wed, 17 Jun 2026 14:30:00 GMT',
-#             'etag': '"d41d8cd98f00b204e9800998ecf8427e"',
-#             'accept-ranges': 'bytes',
-#             'content-type': 'text/csv',
-#             'server': 'AmazonS3',
-#             'content-length': '1056'
-#         },
-#         'RetryAttempts': 0
-#     }
-# }
+    """
+    Downloads a file from S3 and returns its content as a list of lines.
 
+    Returns:
+        A list of strings, one per line in the file (including the header row).
+    """
+    LOGGER.info(f'load_file: loading s3_key={s3_key} from bucket_name={bucket_name}')
+
+    response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+
+    # StreamingBody -> read() -> bytes -> decode('utf-8') -> str -> splitlines() -> list[str]
     body_text = response['Body'].read().decode('utf-8').splitlines()
-    #StreamingBody -> read() -> bytes -> decode('utf-8') -> str -> splitlines() -> list[str]
-    # e.g., body_text = ['Alice,30,Engineer', 'Bob,25,Designer', 'Charlie,35,Manager']
-    LOGGER.info(f'load_file: done: s3_key={s3_key} result_chars={len(body_text)}')
+
+    LOGGER.info(f'load_file: done: s3_key={s3_key} lines={len(body_text)}')
     return body_text

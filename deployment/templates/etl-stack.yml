@@ -20,10 +20,21 @@ Resources:
       Runtime: python3.12
       Handler: etl_lambda.lambda_handler # file_name.function_name
       Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/lambda-execution-role' # security rule
-      Timeout: 30 # max running time in seconds (make as low as possible)
+      Timeout: 300 # max running time in seconds (5 minutes)
       ReservedConcurrentExecutions: 10 # how many can run at once
-      Code: ../src/ # use this folder for the zip of lambda code
-      VpcConfig: # use the same networking as RedShift
+      Code: ../src/
+      Environment:
+        Variables:
+          # SSM_PARAMETER_NAME resolves to 'spam_redshift_settings' for team 'spam'.
+          # The Join/Split converts any dashes in the team name to underscores so the
+          # name matches what the instructors created in Parameter Store.
+          SSM_PARAMETER_NAME:
+            Fn::Join:
+            - '_'
+            - Fn::Split:
+              - '-'
+              - !Sub '${YourName}_redshift_settings'
+      VpcConfig: # place Lambda inside the same VPC as Redshift
         SecurityGroupIds:
           - Fn::ImportValue:
               !Sub '${NetworkStackName}-VPCSGID'
@@ -33,14 +44,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${YourName}-etl-lambda'
-      Environment:
-        Variables:
-          SSM_PARAMETER_NAME:
-            Fn::Join:
-            - '_'
-            - Fn::Split:
-              - '-'
-              - !Sub '${TeamName}_redshift_settings'
 
   RawDataBucket:
     Type: AWS::S3::Bucket

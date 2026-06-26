@@ -12,7 +12,11 @@ set -eu
 # Example: bash deploy.sh data-course spam
 aws_profile="$1"
 your_name="$2"
+
+ec2_ingress_ip="$3" # e.g. 12.34.56.78 (of your laptop where you are running this)
+
 deployment_bucket="${your_name}-deployment-bucket"
+ec2_userdata=$(base64 -i userdata)
 
 # Find absolute path
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -65,10 +69,12 @@ echo "Doing etl stack deployment..."
 echo ""
 aws cloudformation deploy --stack-name "${your_name}-etl-stack" \
     --template-file "${TEMPLATE_DIR}/etl-stack-packaged.yml" --region eu-west-1 \
-    --capabilities CAPABILITY_IAM \
+    --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     --profile ${aws_profile} \
     --parameter-overrides \
-      YourName="${your_name}";
+      YourName="${your_name}"\
+      EC2InstanceIngressIp="${ec2_ingress_ip}" \
+      EC2UserData="${ec2_userdata}";
 
 echo ""
 echo "...all done!"

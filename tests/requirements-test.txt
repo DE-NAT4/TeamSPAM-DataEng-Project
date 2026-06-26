@@ -1,0 +1,5 @@
+# Test dependencies — install with: pip install -r tests/requirements-test.txt
+pytest>=8.0
+boto3>=1.34          # needed by deployment/src/utils/s3_utils.py
+python-dotenv>=1.0   # needed by pipeline/etl/load.py
+psycopg2-binary>=2.9 # needed by pipeline/etl/load.py (binary build avoids libpq dep)

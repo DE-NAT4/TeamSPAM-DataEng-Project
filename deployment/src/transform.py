@@ -90,7 +90,8 @@ def transform(data):
 
         date_str = row['date'].strip()
         time_str = row['time'].strip()
-        order_time = datetime.strptime(f'{date_str} {time_str}', '%d/%m/%Y %H:%M')
+        fmt = '%d/%m/%Y %H:%M:%S' if time_str.count(':') == 2 else '%d/%m/%Y %H:%M'
+        order_time = datetime.strptime(f'{date_str} {time_str}', fmt)
 
         orders.append({
             'id': order_id,
